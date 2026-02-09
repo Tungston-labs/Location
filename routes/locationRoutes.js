@@ -49,8 +49,28 @@ router.post("/", auth, async (req, res) => {
 // Get user's location history
 router.get("/", auth, async (req, res) => {
   try {
+    console.log(req.user.id)
     const locations = await Location.find({ userId: req.user.id }).sort({ createdAt: -1 });
     res.json(locations);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.delete("/:id", auth, async (req, res) => {
+  try {
+
+    const location = await Location.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user.id // ensures user deletes only their data
+    });
+
+    if (!location) {
+      return res.status(404).json({ message: "Location not found" });
+    }
+
+    res.json({ message: "Location deleted successfully" });
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
